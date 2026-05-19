@@ -26,17 +26,34 @@ python app.py
 
 Puis ouvrir : http://127.0.0.1:5000
 
-## API OpenAI facultative
+## API IA facultative (OpenAI ou Gemini)
 
 Sans clé API, le simulateur utilise une réponse pédagogique locale.
 
-Pour activer OpenAI :
+### Pour activer OpenAI :
 
 ```bash
 export OPENAI_API_KEY="votre-cle"
-export OPENAI_MODEL="gpt-4o-mini"
+export AI_PROVIDER="openai"
 python app.py
 ```
+
+### Pour activer Gemini :
+
+```bash
+export GEMINI_API_KEY="votre-cle"
+export AI_PROVIDER="gemini"
+export GEMINI_MODEL="gemini-1.5-flash"  # Optional, defaults to gemini-1.5-flash
+python app.py
+```
+
+**Modèles Gemini disponibles :**
+- `gemini-1.5-flash` (par défaut, rapide et efficace)
+- `gemini-1.5-pro` (plus puissant, meilleure qualité)
+- `gemini-pro` (version précédente)
+- `gemini-2.0-flash-exp` (expérimental, dernière version)
+
+Par défaut, le système utilise OpenAI si `AI_PROVIDER` n'est pas défini. Vous pouvez choisir entre "openai" ou "gemini".
 
 ## Structure
 

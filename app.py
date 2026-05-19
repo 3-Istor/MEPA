@@ -9,13 +9,27 @@ try:
 except Exception:
     OpenAI = None
 
+try:
+    import google.generativeai as genai
+except Exception:
+    genai = None
+
 BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "data" / "scores.json"
 
 app = Flask(__name__)
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")  # Default to gemini-1.5-flash
+AI_PROVIDER = os.getenv("AI_PROVIDER", "openai").lower()  # "openai" or "gemini"
+
 openai_client = OpenAI(api_key=OPENAI_API_KEY) if OpenAI and OPENAI_API_KEY else None
+gemini_model = None
+
+if genai and GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+    gemini_model = genai.GenerativeModel(GEMINI_MODEL)
 
 AGE_GROUPS = [
     {"key": "enfant", "label": "Enfant", "min": 0, "max": 12},
@@ -25,12 +39,12 @@ AGE_GROUPS = [
 ]
 
 VIDEO_CATEGORIES = [
-    "Découverte de l’IA",
-    "Dangers de l’IA",
+    "Découverte de l'IA",
+    "Dangers de l'IA",
     "Fake news",
     "Deepfakes",
     "Cybersécurité",
-    "IA à l’école",
+    "IA à l'école",
     "IA dans la vie quotidienne",
     "Espace seniors",
 ]
@@ -38,7 +52,7 @@ VIDEO_CATEGORIES = [
 QUIZ_QUESTIONS = [
     {
         "question": "Quel est le meilleur réflexe face à une information surprenante générée par IA ?",
-        "choices": ["La partager vite", "Vérifier la source", "Croire l’image", "Répondre immédiatement"],
+        "choices": ["La partager vite", "Vérifier la source", "Croire l'image", "Répondre immédiatement"],
         "answer": 1,
         "explanation": "Une source officielle ou reconnue permet de limiter les fake news et manipulations.",
     },
@@ -50,7 +64,7 @@ QUIZ_QUESTIONS = [
     },
     {
         "question": "Pour bien demander quelque chose à une IA, il faut :",
-        "choices": ["Être vague", "Donner du contexte", "Écrire en majuscules", "Ne poser qu’un mot"],
+        "choices": ["Être vague", "Donner du contexte", "Écrire en majuscules", "Ne poser qu'un mot"],
         "answer": 1,
         "explanation": "Un bon prompt précise le rôle, le contexte, le public et le format attendu.",
     },
@@ -59,8 +73,8 @@ QUIZ_QUESTIONS = [
 SCAMS = [
     {
         "type": "Faux SMS administratif",
-        "message": "AMELI: Votre carte vitale expire aujourd’hui. Cliquez ici pour éviter une amende: http://maj-droits-securite.info",
-        "suspects": ["urgence", "lien non officiel", "menace d’amende"],
+        "message": "AMELI: Votre carte vitale expire aujourd'hui. Cliquez ici pour éviter une amende: http://maj-droits-securite.info",
+        "suspects": ["urgence", "lien non officiel", "menace d'amende"],
         "advice": "Ne cliquez jamais sur un lien reçu par SMS. Passez par le site officiel depuis votre navigateur.",
     },
     {
@@ -72,7 +86,7 @@ SCAMS = [
     {
         "type": "Faux appel vocal",
         "message": "Une voix ressemblant à un proche demande un virement urgent pour régler un problème.",
-        "suspects": ["voix imitée", "demande d’argent", "urgence émotionnelle"],
+        "suspects": ["voix imitée", "demande d'argent", "urgence émotionnelle"],
         "advice": "Raccrochez et rappelez la personne avec son numéro habituel.",
     },
 ]
@@ -103,17 +117,17 @@ def fallback_ai_response(prompt: str, age_group: str):
     simple = age_group in {"enfant", "senior"}
 
     answer = f"""
-Réponse de l’IA :
-Je peux t’aider sur ce sujet : {prompt}
+Réponse de l'IA :
+Je peux t'aider sur ce sujet : {prompt}
 
-Comme le mode OpenAI n’est pas activé, voici une réponse pédagogique simple :
-l’intelligence artificielle peut aider à expliquer, résumer, traduire, organiser des idées ou repérer certains risques.
+Comme le mode IA n'est pas activé, voici une réponse pédagogique simple :
+l'intelligence artificielle peut aider à expliquer, résumer, traduire, organiser des idées ou repérer certains risques.
 Mais elle peut aussi se tromper, donc il faut toujours vérifier les informations importantes.
 
 Analyse du prompt :
 Ton prompt est compréhensible, mais il peut être amélioré en ajoutant le niveau, le format attendu et le contexte.
 
-Conseils d’amélioration :
+Conseils d'amélioration :
 - précise si tu veux une réponse courte ou détaillée ;
 - indique ton niveau ;
 - demande des exemples ;
@@ -143,6 +157,7 @@ Conseils d’amélioration :
         "tips": tips,
         "improved_prompt": improved_prompt,
         "used_openai": False,
+        "used_gemini": False,
     }
 
 
@@ -214,7 +229,7 @@ def simulate_prompt():
     )
 
     if not prompt:
-        message = "Écris d’abord un prompt pour que je puisse répondre."
+        message = "Écris d'abord un prompt pour que je puisse répondre."
         return jsonify({
             "answer": message,
             "response": message,
@@ -225,9 +240,10 @@ def simulate_prompt():
             ],
             "improved_prompt": "Explique-moi un sujet précis avec des mots simples, des exemples et un résumé final.",
             "used_openai": False,
+            "used_gemini": False,
         })
 
-    if openai_client is None:
+    if openai_client is None and gemini_model is None:
         fallback = fallback_ai_response(prompt, age_mode)
         return jsonify({
             "answer": fallback["answer"],
@@ -235,6 +251,7 @@ def simulate_prompt():
             "tips": fallback["tips"],
             "improved_prompt": fallback["improved_prompt"],
             "used_openai": False,
+            "used_gemini": False,
         })
 
     try:
@@ -242,7 +259,7 @@ def simulate_prompt():
 Tu es l'assistant pédagogique officiel de la plateforme MEPA.
 
 Tu réponds uniquement en texte.
-Jamais d’image.
+Jamais d'image.
 
 Tu es :
 - clair
@@ -254,23 +271,44 @@ Tu es :
 Tu réponds toujours en français.
 
 Structure toujours ta réponse comme ceci :
-1. Réponse de l’IA
+1. Réponse de l'IA
 2. Analyse du prompt
-3. Conseils d’amélioration
+3. Conseils d'amélioration
 4. Prompt amélioré
 """
 
-        completion = openai_client.chat.completions.create(
-            model="gpt-4.1-mini",
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.7,
-            max_tokens=900,
-        )
+        answer = None
+        used_provider = None
 
-        answer = completion.choices[0].message.content.strip()
+        # Try Gemini if it's the preferred provider or if OpenAI is not available
+        if (AI_PROVIDER == "gemini" and gemini_model) or (AI_PROVIDER == "gemini" and not openai_client):
+            full_prompt = f"{system_message}\n\nQuestion de l'utilisateur : {prompt}"
+            response = gemini_model.generate_content(
+                full_prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=0.7,
+                    max_output_tokens=900,
+                )
+            )
+            answer = response.text.strip()
+            used_provider = "gemini"
+        
+        # Try OpenAI if it's the preferred provider or if Gemini failed
+        elif openai_client:
+            completion = openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.7,
+                max_tokens=900,
+            )
+            answer = completion.choices[0].message.content.strip()
+            used_provider = "openai"
+
+        if answer is None:
+            raise Exception("No AI provider available")
 
         improved_prompt = (
             f"Explique-moi clairement : {prompt}. "
@@ -286,7 +324,9 @@ Structure toujours ta réponse comme ceci :
                 "Demande un format clair : liste, exemple, étapes ou résumé.",
             ],
             "improved_prompt": improved_prompt,
-            "used_openai": True,
+            "used_openai": used_provider == "openai",
+            "used_gemini": used_provider == "gemini",
+            "provider": used_provider,
         })
 
     except Exception as e:
@@ -297,6 +337,7 @@ Structure toujours ta réponse comme ceci :
             "tips": fallback["tips"],
             "improved_prompt": fallback["improved_prompt"],
             "used_openai": False,
+            "used_gemini": False,
             "error": str(e),
         })
 
