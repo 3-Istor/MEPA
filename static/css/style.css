@@ -1,0 +1,33 @@
+:root{
+  --blue:#000091;
+  --blue-soft:#eef3ff;
+  --red:#e1000f;
+  --white:#fff;
+  --gray:#f6f7fb;
+  --text:#1e1e1e;
+  --muted:#666;
+  --border:#d9dde8;
+  --radius:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);background:var(--white);line-height:1.6}
+.skip-link{position:absolute;left:-999px;top:8px;background:#fff;color:#000;padding:10px;z-index:9999}.skip-link:focus{left:8px}
+.age-gate{background:linear-gradient(135deg,#fff 0%,#f3f6ff 52%,#fff4f4 100%)}
+.official-card,.trust-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 18px 45px rgba(0,0,0,.07)}
+.brand-mark{display:grid;grid-template-columns:1fr 1fr 1fr;width:96px;height:58px;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.brand-mark span:nth-child(1),.mini-flag:before{background:#000091}.brand-mark span:nth-child(2){background:#fff}.brand-mark span:nth-child(3),.mini-flag:after{background:#e1000f}
+.mini-flag{display:inline-grid;grid-template-columns:1fr 1fr 1fr;width:34px;height:22px;border-radius:4px;overflow:hidden;border:1px solid #ddd}.mini-flag:before,.mini-flag:after{content:""}.mini-flag{background:#fff}
+.eyebrow{text-transform:uppercase;letter-spacing:.08em;color:var(--blue);font-weight:800;font-size:.82rem;margin-bottom:.45rem}
+.btn{border-radius:14px;font-weight:700}.btn-primary{background:var(--blue);border-color:var(--blue)}.btn-primary:hover{background:#1212a5;border-color:#1212a5}.btn-danger{background:var(--red);border-color:var(--red)}
+.form-control{border-radius:14px;border-color:var(--border);padding:.9rem 1rem}.form-control:focus{border-color:var(--blue);box-shadow:0 0 0 .25rem rgba(0,0,145,.14)}
+.site-header{box-shadow:0 1px 8px rgba(0,0,0,.04)}.nav-link{font-weight:700;color:#333}.nav-link:hover{color:var(--blue)}
+.hero{background:linear-gradient(180deg,#fff,#f7f9ff)}.bg-light-blue{background:var(--blue-soft)}
+.section-title h2{font-weight:850;letter-spacing:-.02em}.check-list{padding-left:0;list-style:none}.check-list li{padding:.55rem 0 .55rem 2rem;position:relative}.check-list li:before{content:"✓";position:absolute;left:0;color:var(--blue);font-weight:900}
+.video-card{height:100%;transition:.2s transform,.2s box-shadow}.video-card:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(0,0,0,.09)}.video-icon{width:52px;height:52px;border-radius:16px;background:var(--blue-soft);display:grid;place-items:center;font-size:1.4rem}
+.answer-btn{width:100%;text-align:left;border:1px solid var(--border);background:#fff;border-radius:14px;padding:1rem;margin:.35rem 0}.answer-btn:hover,.answer-btn:focus{border-color:var(--blue);background:#f7f8ff}.answer-btn.correct{border-color:#168821;background:#eaf8ed}.answer-btn.wrong{border-color:#e1000f;background:#fff0f1}
+.badge-award{display:inline-flex;align-items:center;gap:.45rem;background:#fff7df;color:#6b4b00;border:1px solid #f0d070;border-radius:999px;padding:.45rem .8rem;font-weight:800;margin:.15rem}
+.scam-message{font-size:1.15rem;background:#f8f8fb;border-left:5px solid var(--red);padding:1rem;border-radius:14px}.suspect-chip{border:1px solid var(--border);border-radius:999px;padding:.55rem .85rem;background:#fff;margin:.25rem;display:inline-block;cursor:pointer}.suspect-chip.selected{background:var(--blue);color:#fff;border-color:var(--blue)}
+body.senior{font-size:1.25rem;background:#fff}body.senior .container{max-width:1040px}body.senior h1{font-size:clamp(2.4rem,5vw,4.4rem)}body.senior h2{font-size:2.4rem}body.senior .lead,body.senior p,body.senior li{font-size:1.35rem}body.senior .btn{font-size:1.35rem;padding:1rem 1.4rem;border-radius:18px}body.senior .nav-link{font-size:1.25rem}body.senior .official-card,body.senior .trust-panel{border:3px solid #111;box-shadow:none}body.senior .bg-light-blue{background:#f2f4ff}body.senior .navbar-nav .nav-item:nth-child(n+4){display:none}body.senior #micButton{display:inline-flex!important}body.senior .text-muted,body.senior .text-secondary{color:#333!important}
+body.enfant{--blue:#2146d0;--blue-soft:#edf6ff}body.adolescent{--blue:#22228a;--blue-soft:#f0f2ff}
+@media (max-width:768px){.display-4{font-size:2.2rem}.site-header{position:static!important}.official-card{border-radius:18px}body.senior .navbar-nav .nav-item{display:block!important}}
