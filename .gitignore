@@ -9,6 +9,3 @@ instance/
 .DS_Store
 *.log
 
-# Vidéos locales non versionnées
-Video intro a l'IA.mp4
-static/videos/video-introduction-ia.mp4

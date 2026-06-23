@@ -118,13 +118,30 @@ def find_video(video_id: str):
 
 
 def find_local_video_path() -> Path | None:
+    project_root = Path(current_app.root_path).parent
+
+    configured_path = Path(
+        current_app.config["LOCAL_VIDEO_PATH"]
+    ).expanduser()
+
+    if not configured_path.is_absolute():
+        configured_path = project_root / configured_path
+
     candidates = [
-        Path(current_app.config["LOCAL_VIDEO_PATH"]),
-        Path(current_app.root_path).parent / "Video intro a l'IA.mp4",
-        Path(current_app.static_folder) / "videos" / "Video intro a l'IA.mp4",
-        Path(current_app.static_folder) / "videos" / "video-introduction-ia.mp4",
+        configured_path,
+        project_root / "Video intro a l'IA.mp4",
+        Path(current_app.static_folder)
+        / "videos"
+        / "Video intro a l'IA.mp4",
+        Path(current_app.static_folder)
+        / "videos"
+        / "video-introduction-ia.mp4",
     ]
-    return next((path for path in candidates if path.is_file()), None)
+
+    return next(
+        (path.resolve() for path in candidates if path.is_file()),
+        None,
+    )
 
 
 @bp.get("/")
