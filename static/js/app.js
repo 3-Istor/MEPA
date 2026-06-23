@@ -193,7 +193,7 @@ function renderVideoDialog(video) {
   if (video.source_type === 'embed') {
     player.innerHTML = `<div class="responsive-frame"><iframe src="${escapeHtml(video.source_url)}" title="${escapeHtml(video.title)}" allow="encrypted-media; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`;
   } else if (video.source_type === 'local') {
-    player.innerHTML = `<video controls preload="metadata" playsinline><source src="${escapeHtml(video.source_url)}" type="video/mp4">Votre navigateur ne prend pas en charge la lecture vidéo.</video><p class="field-hint">Fichier attendu : <code>Video intro a l'IA.mp4</code> à la racine du projet.</p>`;
+	  player.innerHTML = `<video controls preload="metadata" playsinline><source src="${escapeHtml(video.source_url)}" type="video/mp4">Votre navigateur ne prend pas en charge la lecture vidéo.</video>`;
   } else {
     player.innerHTML = '<div class="coming-soon-panel">Cette vidéo arrive bientôt.</div>';
   }
