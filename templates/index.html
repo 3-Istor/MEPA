@@ -3,145 +3,280 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>IA Clair — Plateforme nationale de sensibilisation</title>
-  <meta name="description" content="Plateforme éducative française pour comprendre, utiliser et vérifier l’intelligence artificielle.">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>IA Clair - Plateforme MEPA de sensibilisation à l'IA</title>
+  <meta name="description" content="Plateforme étudiante de sensibilisation à l'intelligence artificielle : vidéos, QCM, laboratoire de prompts, prévention des arnaques et certification.">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
   <a class="skip-link" href="#contenu">Aller au contenu</a>
 
-  <section id="ageGate" class="age-gate min-vh-100 d-flex align-items-center">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-lg-7 col-xl-6">
-          <div class="official-card p-4 p-md-5 text-center">
-            <div class="brand-mark mx-auto mb-4" aria-hidden="true"><span></span><span></span><span></span></div>
-            <p class="eyebrow">Plateforme éducative française</p>
-            <h1 class="display-5 fw-bold">Comprendre l’intelligence artificielle</h1>
-            <p class="lead text-secondary mt-3">Une interface adaptée à votre âge, claire, accessible et rassurante.</p>
-            <form id="ageForm" class="mt-4" aria-label="Choix de l’âge">
-              <label for="age" class="form-label fs-5 fw-semibold">Quel est votre âge ?</label>
-              <input id="age" name="age" type="number" min="5" max="120" class="form-control form-control-lg text-center" required placeholder="Exemple : 68">
-              <button class="btn btn-primary btn-lg w-100 mt-3" type="submit">Accéder à la plateforme</button>
-            </form>
-            <p class="small text-muted mt-4 mb-0">Aucune donnée personnelle n’est nécessaire pour commencer.</p>
-          </div>
-        </div>
+  <header class="site-header" role="banner">
+    <div class="republic-strip" aria-hidden="true"></div>
+    <nav class="nav-shell" aria-label="Navigation principale">
+      <a class="brand" href="#accueil" aria-label="Retour à l'accueil IA Clair">
+        <span class="rf-logo" aria-hidden="true">
+          <span class="flag-french"><i></i><i></i><i></i></span>
+          <strong>IA</strong><small>Clair</small>
+        </span>
+        <span>
+          <strong>IA Clair</strong>
+          <small>Projet étudiant MEPA - identité institutionnelle</small>
+        </span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" type="button">Menu</button>
+      <div id="navLinks" class="nav-links">
+        <a href="#mission">Mission</a>
+        <a href="#formation">Formation</a>
+        <a href="#score">Score</a>
+        <a href="#connexion" id="authNavLink">Connexion</a>
+        <button class="btn btn-small btn-outline hidden" id="logoutBtn" type="button">Déconnexion</button>
       </div>
-    </div>
-  </section>
+    </nav>
+  </header>
 
-  <main id="app" class="d-none">
-    <header class="site-header border-bottom bg-white sticky-top">
-      <nav class="navbar navbar-expand-lg container py-3" aria-label="Navigation principale">
-        <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="#accueil">
-          <span class="mini-flag" aria-hidden="true"></span> IA Clair
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Ouvrir le menu">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navMain">
-          <ul class="navbar-nav ms-auto gap-lg-2">
-            <li class="nav-item"><a class="nav-link" href="#videos">Vidéos</a></li>
-            <li class="nav-item"><a class="nav-link" href="#quiz">Quiz</a></li>
-            <li class="nav-item"><a class="nav-link" href="#prompts">Prompts</a></li>
-            <li class="nav-item"><a class="nav-link" href="#arnaques">Arnaques</a></li>
-            <li class="nav-item"><a class="nav-link" href="#classements">Classements</a></li>
+  <main id="contenu">
+    <section id="accueil" class="hero section-pad">
+      <div class="container hero-grid">
+        <div>
+          <p class="eyebrow">Sensibilisation à l'intelligence artificielle</p>
+          <h1>Comprendre l'IA, mieux l'utiliser et reconnaître les manipulations.</h1>
+          <p class="lead">Une plateforme interactive pour les jeunes, enseignants, établissements scolaires et citoyens. Le parcours combine vidéos, QCM, laboratoire de prompts, prévention des arnaques et certification.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#connexion">Créer un compte</a>
+            <a class="btn btn-outline" href="#mission">Découvrir le projet</a>
+          </div>
+          <p class="notice">Projet lancé le 14 avril 2026 - soutenance finale le 29 juin 2026.</p>
+        </div>
+        <aside class="official-panel" aria-label="Résumé du parcours">
+          <div class="panel-top">
+            <span class="flag-french flag-large" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span>Parcours citoyen numérique</span>
+          </div>
+          <ul class="status-list">
+            <li><strong>3 vidéos</strong><span>2 disponibles et 1 prochainement</span></li>
+            <li><strong>16 questions</strong><span>deux QCM associés aux vidéos</span></li>
+            <li><strong>Prompt lab</strong><span>3 essais IA maximum par compte</span></li>
+            <li><strong>Anti-arnaques</strong><span>phishing, deepfake vocal, images IA</span></li>
+            <li><strong>Certification PDF</strong><span>débloquée dès {{ threshold }}/100</span></li>
           </ul>
-        </div>
-      </nav>
-    </header>
+        </aside>
+      </div>
+    </section>
 
-    <section id="accueil" class="hero py-5">
-      <div class="container" id="contenu">
-        <div class="row align-items-center g-4">
-          <div class="col-lg-7">
-            <p class="eyebrow">Sensibilisation nationale à l’IA</p>
-            <h1 class="display-4 fw-bold">Apprendre à utiliser l’IA avec confiance et esprit critique.</h1>
-            <p id="profileMessage" class="lead text-secondary mt-3"></p>
-            <div class="d-flex flex-wrap gap-3 mt-4">
-              <a href="#videos" class="btn btn-primary btn-lg">Commencer</a>
-              <button id="listenIntro" class="btn btn-outline-primary btn-lg">🔊 Écouter</button>
-              <button id="micButton" class="btn btn-danger btn-lg d-none">🎙️ Parler à l’IA</button>
+    <section id="mission" class="section-pad bg-soft">
+      <div class="container">
+        <div class="section-heading">
+          <p class="eyebrow">Mission de service pédagogique</p>
+          <h2>Développer l'esprit critique face à l'IA</h2>
+          <p>IA Clair aide chacun à comprendre les usages utiles, les risques, les limites et les réflexes responsables, sans se présenter comme un service officiel de l'État.</p>
+        </div>
+        <div class="card-grid three">
+          <article class="card"><span class="icon" aria-hidden="true">🎯</span><h3>Comprendre</h3><p>Découvrir les données, les algorithmes, les modèles, l'IA générative et leurs cas d'usage.</p></article>
+          <article class="card"><span class="icon" aria-hidden="true">⚖️</span><h3>Agir avec responsabilité</h3><p>Identifier les biais, protéger ses données, vérifier les réponses et connaître les impacts sociétaux.</p></article>
+          <article class="card"><span class="icon" aria-hidden="true">🛡️</span><h3>Se protéger</h3><p>Repérer les faux contenus, les voix clonées, le phishing assisté par IA et les faux services.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="formation" class="section-pad">
+      <div class="container">
+        <div class="section-heading split">
+          <div>
+            <p class="eyebrow">Parcours interactif</p>
+            <h2>Une progression enregistrée après connexion</h2>
+            <p>Chaque activité est corrigée côté serveur. Les réponses des QCM ne sont jamais exposées dans le code du navigateur.</p>
+          </div>
+          <a class="btn btn-primary" href="#connexion">Accéder au parcours</a>
+        </div>
+        <div class="card-grid four">
+          <article class="feature-card"><h3>Vidéos et QCM</h3><p>La vidéo doit être ouverte avant de pouvoir être validée ou répondre au QCM associé.</p></article>
+          <article class="feature-card"><h3>Laboratoire de prompts</h3><p>Réponse initiale, diagnostic, prompt amélioré, comparaison et conseils pédagogiques.</p></article>
+          <article class="feature-card"><h3>Prévention des arnaques</h3><p>Scénarios réalistes et analyse d'indices dans les messages et images.</p></article>
+          <article class="feature-card"><h3>Certificat PDF</h3><p>Un certificat nominatif est généré automatiquement à partir de 70 points.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="score" class="section-pad bg-blue-dark">
+      <div class="container score-layout">
+        <div>
+          <p class="eyebrow light">Progression et certification</p>
+          <h2>Un score global sur 100 points</h2>
+          <p>Le score conserve la meilleure note obtenue pour chaque activité afin d'encourager l'apprentissage et les nouvelles tentatives.</p>
+        </div>
+        <div class="score-map" aria-label="Répartition du score">
+          <div><strong>55</strong><span>vidéos et QCM</span></div>
+          <div><strong>20</strong><span>atelier prompts</span></div>
+          <div><strong>25</strong><span>anti-arnaques</span></div>
+          <div><strong>70</strong><span>seuil du certificat</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="connexion" class="section-pad bg-soft">
+      <div class="container auth-grid">
+        <div>
+          <p class="eyebrow">Compte et protection des données</p>
+          <h2>Créer un compte pour sauvegarder la progression</h2>
+          <p>Les données demandées sont limitées au strict nécessaire. Les mots de passe sont hachés avec scrypt. Les prompts ne sont pas conservés en clair.</p>
+          <div class="rgpd-box">
+            <h3>Vos droits dans ce prototype</h3>
+            <ul>
+              <li>Consentement explicite avant inscription.</li>
+              <li>Export de vos données au format JSON.</li>
+              <li>Suppression immédiate du compte et des activités.</li>
+              <li>Trois essais maximum dans le laboratoire IA.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="auth-card" id="authCard">
+          <div class="tabs" role="tablist" aria-label="Connexion ou inscription">
+            <button class="tab active" id="registerTab" type="button" role="tab" aria-selected="true">Inscription</button>
+            <button class="tab" id="loginTab" type="button" role="tab" aria-selected="false">Connexion</button>
+          </div>
+
+          <form id="registerForm" class="auth-form">
+            <label>Prénom ou pseudo
+              <input name="name" required maxlength="80" autocomplete="nickname" placeholder="Ex. Lina">
+            </label>
+            <label>Adresse e-mail
+              <input name="email" required type="email" autocomplete="email" placeholder="nom@example.com">
+            </label>
+            <div class="two-cols">
+              <label>Âge
+                <input name="age" required type="number" min="10" max="120" value="18">
+              </label>
+              <label>Profil
+                <select name="role" required>
+                  <option value="jeune">Jeune</option>
+                  <option value="enseignant">Enseignant</option>
+                  <option value="etablissement">Établissement scolaire</option>
+                  <option value="citoyen" selected>Citoyen</option>
+                </select>
+              </label>
+            </div>
+            <label>Mot de passe
+              <input name="password" required type="password" minlength="10" autocomplete="new-password" placeholder="10 caractères, une lettre et un chiffre">
+            </label>
+            <label class="checkbox-line">
+              <input name="consent" type="checkbox" required>
+              <span>J'accepte l'utilisation de mes données pour créer mon compte, sauvegarder ma progression et générer mon certificat. <a href="/confidentialite">Lire la politique de confidentialité</a>. Version {{ privacy_version }}.</span>
+            </label>
+            <button class="btn btn-primary full" type="submit">Créer mon compte</button>
+          </form>
+
+          <form id="loginForm" class="auth-form hidden">
+            <label>Adresse e-mail
+              <input name="email" required type="email" autocomplete="email" placeholder="nom@example.com">
+            </label>
+            <label>Mot de passe
+              <input name="password" required type="password" autocomplete="current-password">
+            </label>
+            <button class="btn btn-primary full" type="submit">Me connecter</button>
+          </form>
+          <div id="authMessage" class="message" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="espace" class="section-pad training-space hidden">
+      <div class="container">
+        <div class="dashboard">
+          <div>
+            <p class="eyebrow">Espace connecté</p>
+            <h2 id="welcomeTitle">Bienvenue dans la formation</h2>
+            <p id="welcomeText">Votre progression est sauvegardée automatiquement.</p>
+          </div>
+          <div class="progress-card">
+            <div class="score-ring" id="scoreRing" aria-label="Score actuel"><span id="scoreValue">0</span><small>/100</small></div>
+            <div>
+              <strong id="certStatus">Certification verrouillée</strong>
+              <p id="certHint">Atteignez {{ threshold }} points pour télécharger votre certificat.</p>
+              <button class="btn btn-primary hidden" id="certificateBtn" type="button">Télécharger le certificat PDF</button>
             </div>
           </div>
-          <div class="col-lg-5">
-            <div class="trust-panel p-4">
-              <h2 class="h4 fw-bold">Vos réflexes essentiels</h2>
-              <ul class="check-list mt-3">
-                <li>Vérifier les sources importantes</li>
-                <li>Ne jamais partager ses codes</li>
-                <li>Se méfier des urgences artificielles</li>
-                <li>Demander une réponse claire et adaptée</li>
-              </ul>
+        </div>
+
+        <div class="module-tabs" role="tablist" aria-label="Modules de formation">
+          <button data-panel="videosPanel" class="module-tab active" type="button">1. Vidéos et QCM</button>
+          <button data-panel="promptsPanel" class="module-tab" type="button">2. Prompts IA</button>
+          <button data-panel="arnaquesPanel" class="module-tab" type="button">3. Arnaques IA</button>
+          <button data-panel="accountPanel" class="module-tab" type="button">Compte</button>
+        </div>
+
+        <section id="videosPanel" class="module-panel active">
+          <div class="section-heading">
+            <h2>Capsules vidéo et QCM</h2>
+            <p>Ouvrez une capsule pour accéder à son lecteur et à ses huit questions. Une capsule non ouverte ne peut pas être validée.</p>
+          </div>
+          <div id="videoGrid" class="card-grid three"></div>
+        </section>
+
+        <section id="promptsPanel" class="module-panel">
+          <div class="section-heading">
+            <h2>Laboratoire de prompts</h2>
+            <p>Chaque essai utilise une seule requête Gemini pour analyser le prompt, répondre, proposer une amélioration et comparer les résultats.</p>
+          </div>
+          <div id="aiConfigNotice" class="message"></div>
+          <div class="prompt-limit" id="promptLimit" aria-live="polite"></div>
+          <div class="prompt-examples" id="promptExamples"></div>
+          <div class="prompt-grid">
+            <div>
+              <label for="promptInput" class="label-title">Votre prompt</label>
+              <textarea id="promptInput" rows="9" maxlength="1500" placeholder="Ex. Explique les deepfakes à des élèves de 4e en 5 points, avec deux exemples et des conseils de vérification."></textarea>
+              <p class="field-hint">N'insérez aucun mot de passe, document confidentiel ou donnée personnelle sensible.</p>
+              <button class="btn btn-primary" id="analyzePrompt" type="button">Tester mon prompt</button>
+            </div>
+            <div class="output-card" id="promptOutput" aria-live="polite">
+              <p class="muted">Le diagnostic, les deux réponses et les raisons de l'amélioration s'afficheront ici.</p>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </section>
 
-    <section id="videos" class="py-5 bg-light-blue">
-      <div class="container">
-        <div class="section-title"><p class="eyebrow">Parcours vidéo</p><h2>Vidéos éducatives de 10 minutes</h2></div>
-        <div id="videoGrid" class="row g-3 mt-3"></div>
-      </div>
-    </section>
-
-    <section id="quiz" class="py-5">
-      <div class="container">
-        <div class="section-title"><p class="eyebrow">Après chaque vidéo</p><h2>Quiz interactifs</h2></div>
-        <div class="official-card p-4 mt-3">
-          <div id="quizBox"></div>
-          <div id="quizResult" class="alert alert-info d-none mt-3"></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="prompts" class="py-5 bg-light-blue">
-      <div class="container">
-        <div class="section-title"><p class="eyebrow">Apprendre à demander</p><h2>Simulateur de prompts IA</h2></div>
-        <div class="row g-4 mt-2">
-          <div class="col-lg-6">
-            <label for="promptInput" class="form-label fw-semibold">Votre prompt</label>
-            <textarea id="promptInput" class="form-control" rows="7" placeholder="Exemple : explique moi l’IA"></textarea>
-            <button id="sendPrompt" class="btn btn-primary btn-lg mt-3">Tester mon prompt</button>
+        <section id="arnaquesPanel" class="module-panel">
+          <div id="arnaques" class="section-heading"><h2>Détection d'arnaques assistées par IA</h2><p>Analysez un message suspect puis une image générée ou manipulée.</p></div>
+          <div class="anti-scam-grid">
+            <article class="lab-card"><h3>Exercice 1 - Message suspect</h3><div id="scamBox"></div></article>
+            <article class="lab-card"><h3>Exercice 2 - Image générée</h3><div id="imageLab"></div></article>
           </div>
-          <div class="col-lg-6">
-            <div id="promptOutput" class="official-card p-4 h-100" aria-live="polite">
-              <p class="text-muted mb-0">La réponse, les conseils et un prompt amélioré apparaîtront ici.</p>
-            </div>
+          <div id="scamResult" class="message result-box" aria-live="polite"></div>
+        </section>
+
+        <section id="accountPanel" class="module-panel">
+          <div class="section-heading"><h2>Gestion du compte</h2><p>Exportez vos données ou supprimez définitivement votre compte.</p></div>
+          <div class="account-actions">
+            <a class="btn btn-outline" href="/api/account/export" download>Exporter mes données</a>
+            <button class="btn btn-danger" id="deleteAccountBtn" type="button">Supprimer mon compte</button>
           </div>
-        </div>
+          <p class="muted">La suppression efface le compte, les activités, les tentatives de prompts et les certificats associés.</p>
+        </section>
       </div>
     </section>
-
-    <section id="arnaques" class="py-5">
-      <div class="container">
-        <div class="section-title"><p class="eyebrow">Prévention</p><h2>Simulateur d’arnaques IA</h2></div>
-        <div id="scamBox" class="official-card p-4 mt-3"></div>
-      </div>
-    </section>
-
-    <section id="classements" class="py-5 bg-light-blue">
-      <div class="container">
-        <div class="section-title"><p class="eyebrow">Progression</p><h2>Classements et badges</h2></div>
-        <div class="row g-4 mt-2">
-          <div class="col-md-6"><div class="official-card p-4"><h3 class="h5">Classement national</h3><ol id="nationalRanking"></ol></div></div>
-          <div class="col-md-6"><div class="official-card p-4"><h3 class="h5">Classement par âge</h3><ol id="ageRanking"></ol></div></div>
-        </div>
-      </div>
-    </section>
-
-    <footer class="py-4 bg-dark text-white">
-      <div class="container d-flex flex-column flex-md-row justify-content-between gap-2">
-        <span>IA Clair — plateforme éducative de démonstration</span>
-        <span>Accessibilité • Sécurité • Esprit critique</span>
-      </div>
-    </footer>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <dialog id="videoDialog" class="video-dialog" aria-labelledby="videoDialogTitle">
+    <div class="dialog-header">
+      <div><p class="eyebrow">Capsule pédagogique</p><h2 id="videoDialogTitle">Vidéo</h2></div>
+      <button class="dialog-close" id="closeVideoDialog" type="button" aria-label="Fermer">×</button>
+    </div>
+    <div id="videoPlayer" class="video-player"></div>
+    <div class="dialog-actions">
+      <button class="btn btn-outline" id="completeVideoBtn" type="button">Marquer la vidéo comme terminée</button>
+    </div>
+    <div class="section-heading compact"><h3>QCM associé</h3><p>Répondez aux huit questions puis validez.</p></div>
+    <form id="videoQuizForm" class="quiz-list"></form>
+    <button class="btn btn-primary" id="submitVideoQuiz" type="button">Valider le QCM</button>
+    <div id="videoQuizResult" class="message result-box" aria-live="polite"></div>
+  </dialog>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <span>IA Clair - plateforme éducative de démonstration</span>
+      <span>Équipe de 6 étudiants - <a href="/confidentialite">confidentialité</a> - accessibilité - sécurité</span>
+    </div>
+  </footer>
+
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

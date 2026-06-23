@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620" role="img" aria-labelledby="title desc">
+  <title id="title">Portrait pédagogique avec indices d’image IA</title>
+  <desc id="desc">Illustration volontairement artificielle avec une main à six doigts, un texte incohérent et des ombres contradictoires.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1"><stop stop-color="#e9efff"/><stop offset="1" stop-color="#fff1f2"/></linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="1.2"/></filter>
+  </defs>
+  <rect width="900" height="620" fill="url(#bg)"/>
+  <circle cx="710" cy="110" r="66" fill="#fff6b7" opacity=".85"/>
+  <ellipse cx="220" cy="520" rx="170" ry="38" fill="#313178" opacity=".20"/>
+  <ellipse cx="610" cy="548" rx="210" ry="26" fill="#e1000f" opacity=".18"/>
+  <rect x="92" y="88" width="706" height="454" rx="34" fill="#fff" stroke="#d8dbe6" stroke-width="4"/>
+  <rect x="120" y="116" width="250" height="64" rx="12" fill="#f4f6ff"/>
+  <text x="145" y="157" font-family="Arial" font-weight="700" font-size="24" fill="#000091">BOUJR  A1-CL4!R</text>
+  <g transform="translate(435 122)">
+    <ellipse cx="0" cy="148" rx="110" ry="142" fill="#ffd6bd"/>
+    <path d="M-98 150c26 76 172 76 198 0 0 104-44 172-99 172S-98 254-98 150z" fill="#1f4aa7"/>
+    <path d="M-92 90c32-92 148-100 190-12 18 38 12 98-6 122-8-42-24-74-58-94-40 38-92 45-148 30 0 0 5-25 22-46z" fill="#3b2a20"/>
+    <circle cx="-38" cy="147" r="10" fill="#2c2c2c"/>
+    <circle cx="42" cy="137" r="10" fill="#2c2c2c"/>
+    <path d="M-42 208c32 22 70 16 92-4" fill="none" stroke="#8c3d3d" stroke-width="7" stroke-linecap="round"/>
+    <path d="M-5 160c-8 18-8 34 5 39" fill="none" stroke="#c7856a" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(605 320) rotate(-12)">
+    <path d="M0 92c-12-44-4-98 36-106 40-8 60 28 58 64l-2 58c-3 48-78 52-92-16z" fill="#ffd6bd" stroke="#c7856a" stroke-width="3"/>
+    <rect x="-12" y="86" width="112" height="118" rx="46" fill="#ffd6bd" stroke="#c7856a" stroke-width="3"/>
+    <rect x="0" y="-74" width="25" height="130" rx="13" fill="#ffd6bd" stroke="#c7856a" stroke-width="3"/>
+    <rect x="31" y="-88" width="24" height="144" rx="13" fill="#ffd6bd" stroke="#c7856a" stroke-width="3"/>
+    <rect x="63" y="-80" width="24" height="136" rx="13" fill="#ffd6bd" stroke="#c7856a" stroke-width="3"/>
+    <rect x="93" y="-62" width="24" height="124" rx="13" fill="#ffd6bd" stroke="#c7856a" stroke-width="3"/>
+    <rect x="120" y="-35" width="22" height="104" rx="12" fill="#ffd6bd" stroke="#c7856a" stroke-width="3"/>
+    <rect x="-33" y="-46" width="22" height="112" rx="12" fill="#ffd6bd" stroke="#c7856a" stroke-width="3"/>
+  </g>
+  <g filter="url(#soft)">
+    <path d="M570 190l90 52" stroke="#000" stroke-width="10" opacity=".12"/>
+    <path d="M240 235l-120 80" stroke="#000" stroke-width="10" opacity=".10"/>
+  </g>
+  <g transform="translate(126 438)">
+    <circle cx="0" cy="0" r="12" fill="#e1000f"/><text x="24" y="7" font-family="Arial" font-size="23" font-weight="700" fill="#1f1f1f">Indice : les textes et mains sont à inspecter.</text>
+  </g>
+</svg>
