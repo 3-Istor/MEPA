@@ -15,7 +15,7 @@ class Config:
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
     GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite").strip()
     PROMPT_ATTEMPT_LIMIT = int(os.getenv("PROMPT_ATTEMPT_LIMIT", "3"))
-    LOCAL_VIDEO_PATH = os.getenv("LOCAL_VIDEO_PATH", str(PROJECT_ROOT / "Video intro a l'IA.mp4"))
+    LOCAL_VIDEO_PATH = os.getenv("LOCAL_VIDEO_PATH", str(PROJECT_ROOT / "video-introduction-ia.mp4"))
     MAX_CONTENT_LENGTH = 2 * 1024 * 1024
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"

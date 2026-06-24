@@ -129,10 +129,7 @@ def find_local_video_path() -> Path | None:
 
     candidates = [
         configured_path,
-        project_root / "Video intro a l'IA.mp4",
-        Path(current_app.static_folder)
-        / "videos"
-        / "Video intro a l'IA.mp4",
+        project_root / "video-introduction-ia.mp4",
         Path(current_app.static_folder)
         / "videos"
         / "video-introduction-ia.mp4",
@@ -359,7 +356,7 @@ def local_video():
     if not path:
         return jsonify({
             "error": "local_video_missing",
-            "message": "Le fichier vidéo local est introuvable. Placez « Video intro a l'IA.mp4 » à la racine du projet ou configurez LOCAL_VIDEO_PATH.",
+            "message": "Le fichier vidéo local est introuvable. Placez « video-introduction-ia.mp4 » à la racine du projet ou configurez LOCAL_VIDEO_PATH.",
         }), 404
     return send_file(path, mimetype="video/mp4", conditional=True, max_age=0)
 
