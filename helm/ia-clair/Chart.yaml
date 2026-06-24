@@ -1,0 +1,12 @@
+apiVersion: v2
+name: ia-clair
+description: A Helm chart for IA Clair educational platform
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - education
+  - ai
+  - flask
+maintainers:
+  - name: IA Clair Team
