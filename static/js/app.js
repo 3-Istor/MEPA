@@ -49,7 +49,7 @@ async function api(path, options = {}) {
   const data = contentType.includes('application/json') ? await response.json().catch(() => ({})) : {};
   if (data.csrf_token) setCsrfToken(data.csrf_token);
   if (!response.ok) {
-    const message = data.errors?.join(' ') || data.message || data.error || 'Une erreur est survenue.';
+    const message = data.errors?.join(' ') || data.message || data.error || `Le serveur a renvoyé une erreur HTTP ${response.status}.`;
     const error = new Error(message);
     error.status = response.status;
     error.data = data;

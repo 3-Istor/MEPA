@@ -21,6 +21,7 @@ def app(tmp_path):
         "LOCAL_VIDEO_PATH": str(video),
         "GEMINI_API_KEY": "test-key",
         "GEMINI_MODEL": "test-model",
+        "GEMINI_FALLBACK_MODEL": "fallback-model",
         "PROMPT_ATTEMPT_LIMIT": 3,
     })
     return app
@@ -69,7 +70,11 @@ def test_health_reports_gemini_configuration(client):
     assert response.status_code == 200
     assert response.get_json() == {
         "status": "ok",
-        "services": {"gemini_configured": True},
+        "services": {
+            "gemini_configured": True,
+            "gemini_model": "test-model",
+            "gemini_fallback_model": "fallback-model",
+        },
     }
 
 
@@ -225,8 +230,8 @@ def test_ai_runtime_error_does_not_consume_attempt(client, monkeypatch):
     assert client.get("/api/progress").get_json()["prompt_usage"]["remaining"] == 3
 
 
-def test_gemini_retries_transient_errors(monkeypatch):
-    calls = {"count": 0}
+def test_gemini_retries_transient_errors_with_fallback(monkeypatch):
+    calls = {"count": 0, "models": []}
     successful_payload = {
         "original_response": "Réponse initiale.",
         "improved_prompt": "Prompt amélioré.",
@@ -237,9 +242,10 @@ def test_gemini_retries_transient_errors(monkeypatch):
     }
 
     class FakeModels:
-        def generate_content(self, **_kwargs):
+        def generate_content(self, **kwargs):
             calls["count"] += 1
-            if calls["count"] < 3:
+            calls["models"].append(kwargs["model"])
+            if calls["count"] < 4:
                 raise RuntimeError("temporary_failure")
             return SimpleNamespace(text=json.dumps(successful_payload))
 
@@ -249,15 +255,21 @@ def test_gemini_retries_transient_errors(monkeypatch):
     fake_genai = SimpleNamespace(Client=lambda **_kwargs: FakeClient())
     fake_types = SimpleNamespace(
         HttpOptions=lambda **_kwargs: object(),
+        HttpRetryOptions=lambda **_kwargs: object(),
         GenerateContentConfig=lambda **_kwargs: object(),
+        ThinkingConfig=lambda **_kwargs: object(),
     )
     monkeypatch.setattr("mepa.ai_service.genai", fake_genai)
     monkeypatch.setattr("mepa.ai_service.types", fake_types)
     monkeypatch.setattr("mepa.ai_service.time.sleep", lambda _seconds: None)
 
-    result = analyze_with_gemini("key", "model", "prompt", "suggestion", retry_attempts=3)
-    assert calls["count"] == 3
-    assert result == successful_payload
+    result = analyze_with_gemini(
+        "key", "model", "prompt", "suggestion",
+        retry_attempts=3, fallback_model="fallback-model",
+    )
+    assert calls["count"] == 4
+    assert calls["models"] == ["model", "model", "model", "fallback-model"]
+    assert result == {**successful_payload, "_model_used": "fallback-model"}
 
 
 def test_age_groups_become_progressively_more_accessible():

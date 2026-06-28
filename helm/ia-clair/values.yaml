@@ -79,6 +79,7 @@ persistence:
 env:
   AI_PROVIDER: "gemini"
   DATABASE_PATH: "/app/data/mepa.sqlite"
+  GEMINI_FALLBACK_MODEL: "gemini-2.5-flash-lite"
   GEMINI_RETRY_ATTEMPTS: "3"
   PROMPT_ATTEMPT_LIMIT: "3"
   SESSION_COOKIE_SECURE: "true"
@@ -92,7 +93,7 @@ secrets:
   SECRET_KEY: ""
   OPENAI_API_KEY: ""
   GEMINI_API_KEY: ""
-  GEMINI_MODEL: "gemini-2.5-flash-lite"
+  GEMINI_MODEL: "gemini-2.5-flash"
 
 extraEnv: []
 extraEnvFrom: []

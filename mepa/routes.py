@@ -493,6 +493,7 @@ def analyze_prompt():
             prompt,
             evaluation.improved_prompt,
             current_app.config["GEMINI_RETRY_ATTEMPTS"],
+            current_app.config["GEMINI_FALLBACK_MODEL"],
         )
         db.execute("UPDATE prompt_attempts SET status = 'success' WHERE id = ?", (cursor.lastrowid,))
         db.commit()
@@ -506,6 +507,7 @@ def analyze_prompt():
             "prompt_usage": prompt_usage(user["id"]),
         }), 502
 
+    model_used = ai_result.pop("_model_used", current_app.config["GEMINI_MODEL"])
     improved_prompt = normalize_prompt(ai_result.get("improved_prompt", ""), 1800) or evaluation.improved_prompt
     save_activity(
         user["id"],
@@ -515,7 +517,7 @@ def analyze_prompt():
         20,
         {
             "provider": "gemini",
-            "model": current_app.config["GEMINI_MODEL"],
+            "model": model_used,
             "checks": evaluation.checks,
             "prompt_sha256": prompt_hash,
         },
@@ -533,7 +535,7 @@ def analyze_prompt():
         "improvement_reasons": ai_result["improvement_reasons"],
         "pedagogical_advice": ai_result["pedagogical_advice"],
         "provider": "gemini",
-        "model": current_app.config["GEMINI_MODEL"],
+        "model": model_used,
         "prompt_usage": progress["prompt_usage"],
         "progress": progress,
     })
@@ -609,5 +611,9 @@ def download_certificate():
 def health():
     return jsonify({
         "status": "ok",
-        "services": {"gemini_configured": bool(current_app.config["GEMINI_API_KEY"])},
+        "services": {
+            "gemini_configured": bool(current_app.config["GEMINI_API_KEY"]),
+            "gemini_model": current_app.config["GEMINI_MODEL"],
+            "gemini_fallback_model": current_app.config["GEMINI_FALLBACK_MODEL"],
+        },
     })

@@ -38,12 +38,13 @@ Le fichier `.env` est déjà inclus dans cette archive avec une clé Flask aléa
 
 ```env
 GEMINI_API_KEY=votre_cle_ici
-GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_FALLBACK_MODEL=gemini-2.5-flash-lite
 GEMINI_RETRY_ATTEMPTS=3
 PROMPT_ATTEMPT_LIMIT=3
 ```
 
-La clé ne doit jamais être écrite dans `static/js/app.js`, dans un dépôt Git ou dans le navigateur. L'application réessaie automatiquement jusqu'à trois fois en cas d'échec temporaire. Seuls les essais réussis sont décomptés, et le quatrième succès est bloqué pour chaque compte.
+La clé ne doit jamais être écrite dans `static/js/app.js`, dans un dépôt Git ou dans le navigateur. En cas d'échec temporaire, l'application essaie jusqu'à trois fois le modèle principal, puis jusqu'à trois fois le modèle de secours. La durée de chaque appel est limitée et les retries internes du SDK sont désactivés afin de garder exactement cette stratégie. Seuls les essais réussis sont décomptés, et le quatrième succès est bloqué pour chaque compte.
 
 Les quotas gratuits sont gérés par Google et peuvent varier selon le projet. Consultez vos limites actives dans Google AI Studio.
 

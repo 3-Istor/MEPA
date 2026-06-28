@@ -93,6 +93,7 @@ def analyze_with_gemini(
     prompt: str,
     suggested_prompt: str,
     retry_attempts: int = 3,
+    fallback_model: str = "gemini-2.5-flash-lite",
 ) -> dict:
     if not api_key:
         raise RuntimeError("ai_not_configured")
@@ -120,19 +121,29 @@ Proposition heuristique à utiliser comme point de départ, sans obligation de l
 {suggested_prompt}
 """.strip()
 
-    attempts = max(1, min(5, int(retry_attempts)))
+    attempts_per_model = max(1, min(3, int(retry_attempts)))
+    models = [model] * attempts_per_model
+    if fallback_model and fallback_model != model:
+        models.extend([fallback_model] * attempts_per_model)
     last_error = None
-    for attempt in range(attempts):
+    for attempt, selected_model in enumerate(models):
         try:
-            client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=25000))
+            client = genai.Client(
+                api_key=api_key,
+                http_options=types.HttpOptions(
+                    timeout=10000,
+                    retry_options=types.HttpRetryOptions(attempts=1),
+                ),
+            )
             response = client.models.generate_content(
-                model=model,
+                model=selected_model,
                 contents=instruction,
                 config=types.GenerateContentConfig(
                     temperature=0.25,
-                    max_output_tokens=1800,
+                    max_output_tokens=4096,
                     response_mime_type="application/json",
                     response_json_schema=RESPONSE_SCHEMA,
+                    thinking_config=types.ThinkingConfig(thinking_budget=0),
                 ),
             )
             text = (response.text or "").strip()
@@ -142,9 +153,10 @@ Proposition heuristique à utiliser comme point de départ, sans obligation de l
             for key in RESPONSE_SCHEMA["required"]:
                 if key not in payload:
                     raise RuntimeError("invalid_ai_response")
+            payload["_model_used"] = selected_model
             return payload
         except Exception as exc:
             last_error = exc
-            if attempt + 1 < attempts:
-                time.sleep(0.6 * (attempt + 1))
+            if attempt + 1 < len(models):
+                time.sleep(0.4)
     raise RuntimeError("ai_retry_exhausted") from last_error
