@@ -32,9 +32,13 @@ def is_valid_email(email: str) -> bool:
 def classify_age(age: int) -> str:
     if age < 18:
         return "jeune"
-    if age >= 65:
+    if age < 45:
+        return "adulte"
+    if age < 60:
+        return "mature"
+    if age < 75:
         return "senior"
-    return "adulte"
+    return "grand_senior"
 
 
 def user_to_dict(row) -> dict:
@@ -68,7 +72,10 @@ def save_activity(user_id: int, module_id: str, activity_type: str, points: int,
 
 
 def prompt_usage(user_id: int) -> dict:
-    used = get_db().execute("SELECT COUNT(*) FROM prompt_attempts WHERE user_id = ?", (user_id,)).fetchone()[0]
+    used = get_db().execute(
+        "SELECT COUNT(*) FROM prompt_attempts WHERE user_id = ? AND status = 'success'",
+        (user_id,),
+    ).fetchone()[0]
     limit = current_app.config["PROMPT_ATTEMPT_LIMIT"]
     return {"used": used, "limit": limit, "remaining": max(0, limit - used)}
 
@@ -313,7 +320,16 @@ def submit_video_quiz(video_id: str):
     if not opened:
         return jsonify({"error": "video_not_opened", "message": "Ouvrez la vidéo avant de répondre à son QCM."}), 409
     answers = (request.get_json(silent=True) or {}).get("answers", [])
-    if not isinstance(answers, list) or len(answers) != len(questions) or any(not isinstance(answer, int) for answer in answers):
+    if (
+        not isinstance(answers, list)
+        or len(answers) != len(questions)
+        or any(
+            not isinstance(answer, int)
+            or isinstance(answer, bool)
+            or not 0 <= answer < len(questions[index]["choices"])
+            for index, answer in enumerate(answers)
+        )
+    ):
         return jsonify({"errors": ["Répondez à toutes les questions du QCM."]}), 400
 
     corrections = []
@@ -346,6 +362,45 @@ def submit_video_quiz(video_id: str):
         "question_count": len(questions),
         "corrections": corrections,
         "progress": get_progress(user["id"]),
+    })
+
+
+@bp.post("/api/videos/<video_id>/quiz/check")
+@login_required
+def check_video_quiz_question(video_id: str):
+    user = current_user()
+    video = find_video(video_id)
+    questions = VIDEO_QUIZZES.get(video_id)
+    if not video or not questions:
+        return jsonify({"error": "quiz_not_found", "message": "QCM introuvable."}), 404
+    opened = get_db().execute(
+        "SELECT 1 FROM video_views WHERE user_id = ? AND video_id = ?",
+        (user["id"], video_id),
+    ).fetchone()
+    if not opened:
+        return jsonify({"error": "video_not_opened", "message": "Ouvrez la vidéo avant de répondre à son QCM."}), 409
+
+    data = request.get_json(silent=True) or {}
+    question_index = data.get("question_index")
+    answer = data.get("answer")
+    if (
+        not isinstance(question_index, int)
+        or isinstance(question_index, bool)
+        or not 0 <= question_index < len(questions)
+    ):
+        return jsonify({"errors": ["Question invalide."]}), 400
+    question = questions[question_index]
+    if (
+        not isinstance(answer, int)
+        or isinstance(answer, bool)
+        or not 0 <= answer < len(question["choices"])
+    ):
+        return jsonify({"errors": ["Sélectionnez une réponse avant de valider cette question."]}), 400
+    return jsonify({
+        "ok": True,
+        "question_index": question_index,
+        "correct": answer == question["answer"],
+        "message": "Bonne réponse !" if answer == question["answer"] else "Cette réponse est incorrecte. Essayez encore.",
     })
 
 
@@ -437,6 +492,7 @@ def analyze_prompt():
             current_app.config["GEMINI_MODEL"],
             prompt,
             evaluation.improved_prompt,
+            current_app.config["GEMINI_RETRY_ATTEMPTS"],
         )
         db.execute("UPDATE prompt_attempts SET status = 'success' WHERE id = ?", (cursor.lastrowid,))
         db.commit()
@@ -446,7 +502,7 @@ def analyze_prompt():
         current_app.logger.exception("Erreur Gemini: %s", exc)
         return jsonify({
             "error": "ai_unavailable",
-            "message": "Le service Gemini n'a pas répondu correctement. Vérifiez la clé, le modèle et les quotas, puis réessayez avec un autre compte de test si la limite est atteinte.",
+            "message": "Le service IA est momentanément indisponible après plusieurs tentatives. Votre essai n'a pas été décompté : vous pouvez réessayer dans un instant.",
             "prompt_usage": prompt_usage(user["id"]),
         }), 502
 
@@ -455,7 +511,7 @@ def analyze_prompt():
         user["id"],
         "prompt-lab",
         "prompt",
-        evaluation.points,
+        20,
         20,
         {
             "provider": "gemini",
@@ -467,7 +523,7 @@ def analyze_prompt():
     progress = get_progress(user["id"])
     return jsonify({
         "ok": True,
-        "points": evaluation.points,
+        "points": 20,
         "max_points": 20,
         "checks": evaluation.checks,
         "answer": ai_result["original_response"],

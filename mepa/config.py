@@ -14,6 +14,7 @@ class Config:
     DATABASE_PATH = os.getenv("DATABASE_PATH", str(PROJECT_ROOT / "data" / "mepa.sqlite"))
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
     GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite").strip()
+    GEMINI_RETRY_ATTEMPTS = max(1, min(5, int(os.getenv("GEMINI_RETRY_ATTEMPTS", "3"))))
     PROMPT_ATTEMPT_LIMIT = int(os.getenv("PROMPT_ATTEMPT_LIMIT", "3"))
     LOCAL_VIDEO_PATH = os.getenv("LOCAL_VIDEO_PATH", str(PROJECT_ROOT / "video-introduction-ia.mp4"))
     MAX_CONTENT_LENGTH = 2 * 1024 * 1024

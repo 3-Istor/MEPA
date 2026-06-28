@@ -8,7 +8,7 @@ VIDEO_MODULES = [
     {
         "id": "video-introduction-ia",
         "title": "Introduction à l'intelligence artificielle",
-        "duration": "Vidéo locale",
+        "duration": "",
         "summary": "Découvrir ce qu'est l'IA, les données, les algorithmes, l'apprentissage automatique et les usages courants.",
         "takeaways": [
             "Distinguer IA, algorithme, modèle et données",
@@ -24,7 +24,7 @@ VIDEO_MODULES = [
     {
         "id": "video-fonctionnement-ia",
         "title": "Comment fonctionne une IA ?",
-        "duration": "Capsule HeyGen",
+        "duration": "",
         "summary": "Comprendre l'entraînement, les modèles, les prompts, les erreurs possibles et les bonnes pratiques.",
         "takeaways": [
             "Une IA apprend à partir de nombreux exemples",

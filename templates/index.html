@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token }}">
-  <title>IA Clair - Plateforme MEPA de sensibilisation à l'IA</title>
+  <title>IA Citoyenne - Plateforme MEPA de sensibilisation à l'IA</title>
   <meta name="description" content="Plateforme étudiante de sensibilisation à l'intelligence artificielle : vidéos, QCM, laboratoire de prompts, prévention des arnaques et certification.">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
@@ -14,14 +14,13 @@
   <header class="site-header" role="banner">
     <div class="republic-strip" aria-hidden="true"></div>
     <nav class="nav-shell" aria-label="Navigation principale">
-      <a class="brand" href="#accueil" aria-label="Retour à l'accueil IA Clair">
+      <a class="brand" href="#accueil" aria-label="Retour à l'accueil IA Citoyenne">
         <span class="rf-logo" aria-hidden="true">
           <span class="flag-french"><i></i><i></i><i></i></span>
-          <strong>IA</strong><small>Clair</small>
+          <strong>IA</strong><small>Citoyenne</small>
         </span>
         <span>
-          <strong>IA Clair</strong>
-          <small>Projet étudiant MEPA - identité institutionnelle</small>
+          <strong>IA Citoyenne</strong>
         </span>
       </a>
       <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" type="button">Menu</button>
@@ -43,10 +42,9 @@
           <h1>Comprendre l'IA, mieux l'utiliser et reconnaître les manipulations.</h1>
           <p class="lead">Une plateforme interactive pour les jeunes, enseignants, établissements scolaires et citoyens. Le parcours combine vidéos, QCM, laboratoire de prompts, prévention des arnaques et certification.</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="#connexion">Créer un compte</a>
+            <a class="btn btn-primary hidden" id="heroAccountBtn" href="#connexion">Créer un compte</a>
             <a class="btn btn-outline" href="#mission">Découvrir le projet</a>
           </div>
-          <p class="notice">Projet lancé le 14 avril 2026 - soutenance finale le 29 juin 2026.</p>
         </div>
         <aside class="official-panel" aria-label="Résumé du parcours">
           <div class="panel-top">
@@ -69,7 +67,7 @@
         <div class="section-heading">
           <p class="eyebrow">Mission de service pédagogique</p>
           <h2>Développer l'esprit critique face à l'IA</h2>
-          <p>IA Clair aide chacun à comprendre les usages utiles, les risques, les limites et les réflexes responsables, sans se présenter comme un service officiel de l'État.</p>
+          <p>IA Citoyenne aide chacun à comprendre les usages utiles, les risques, les limites et les réflexes responsables, sans se présenter comme un service officiel de l'État.</p>
         </div>
         <div class="card-grid three">
           <article class="card"><span class="icon" aria-hidden="true">🎯</span><h3>Comprendre</h3><p>Découvrir les données, les algorithmes, les modèles, l'IA générative et leurs cas d'usage.</p></article>
@@ -87,7 +85,7 @@
             <h2>Une progression enregistrée après connexion</h2>
             <p>Chaque activité est corrigée côté serveur. Les réponses des QCM ne sont jamais exposées dans le code du navigateur.</p>
           </div>
-          <a class="btn btn-primary" href="#connexion">Accéder au parcours</a>
+          <a class="btn btn-primary" id="courseAccessBtn" href="#connexion">Accéder au parcours</a>
         </div>
         <div class="card-grid four">
           <article class="feature-card"><h3>Vidéos et QCM</h3><p>La vidéo doit être ouverte avant de pouvoir être validée ou répondre au QCM associé.</p></article>
@@ -216,7 +214,7 @@
         <section id="promptsPanel" class="module-panel">
           <div class="section-heading">
             <h2>Laboratoire de prompts</h2>
-            <p>Chaque essai utilise une seule requête Gemini pour analyser le prompt, répondre, proposer une amélioration et comparer les résultats.</p>
+            <p>Chaque essai utilise Gemini pour analyser le prompt, répondre, proposer une amélioration et comparer les résultats. En cas d'échec temporaire, le serveur réessaie automatiquement sans décompter l'essai.</p>
           </div>
           <div id="aiConfigNotice" class="message"></div>
           <div class="prompt-limit" id="promptLimit" aria-live="polite"></div>
@@ -272,7 +270,7 @@
 
   <footer class="footer">
     <div class="container footer-grid">
-      <span>IA Clair - plateforme éducative de démonstration</span>
+      <span>IA Citoyenne - plateforme éducative de démonstration</span>
       <span>Équipe de 6 étudiants - <a href="/confidentialite">confidentialité</a> - accessibilité - sécurité</span>
     </div>
   </footer>

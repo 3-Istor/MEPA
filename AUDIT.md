@@ -21,7 +21,7 @@
 ## Corrections appliquées
 
 - Architecture en modules : `config`, `db`, `security`, `content`, `ai_service`, `pdf_service`, `routes`.
-- Gemini `gemini-2.5-flash-lite` avec **une seule requête structurée par essai**.
+- Gemini `gemini-2.5-flash-lite` avec une réponse structurée et jusqu'à trois tentatives automatiques en cas d'échec temporaire.
 - Limite de **3 essais par compte**, imposée et comptée côté serveur.
 - Réponse initiale, diagnostic, prompt amélioré, réponse améliorée et conseils retournés dans un JSON structuré.
 - Aucun prompt conservé en clair ; seule une empreinte SHA-256 et le statut de la tentative sont stockés.

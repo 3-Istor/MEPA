@@ -1,8 +1,12 @@
 import json
+from types import SimpleNamespace
+
 import pytest
 
 from mepa import create_app
+from mepa.ai_service import analyze_with_gemini
 from mepa.db import get_db
+from mepa.routes import classify_age
 
 
 @pytest.fixture()
@@ -40,12 +44,12 @@ def post(client, path, payload=None, token=None):
     )
 
 
-def register(client, email="test@example.com"):
+def register(client, email="test@example.com", age=18):
     token = csrf(client)
     response = post(client, "/api/register", {
         "name": "Lina",
         "email": email,
-        "age": 18,
+        "age": age,
         "role": "citoyen",
         "password": "Motdepasse123",
         "consent": True,
@@ -63,6 +67,14 @@ def test_privacy_policy_is_public(client):
     response = client.get("/confidentialite")
     assert response.status_code == 200
     assert "Politique de confidentialité" in response.get_data(as_text=True)
+
+
+def test_new_branding_and_removed_project_dates(client):
+    page = client.get("/").get_data(as_text=True)
+    assert "IA Citoyenne" in page
+    assert "IA Clair" not in page
+    assert "Projet lancé le 14 avril 2026" not in page
+    assert "Projet étudiant MEPA - identité institutionnelle" not in page
 
 
 def test_csrf_is_required(client):
@@ -109,7 +121,37 @@ def test_video_quiz_is_corrected_server_side(client):
     assert payload["points"] == 22
 
 
-def test_prompt_limit_and_single_structured_result(client, monkeypatch):
+def test_each_video_question_can_be_checked_server_side(client):
+    token = register(client)
+    closed = post(client, "/api/videos/video-introduction-ia/quiz/check", {
+        "question_index": 0,
+        "answer": 0,
+    }, token)
+    assert closed.status_code == 409
+
+    post(client, "/api/videos/video-introduction-ia/open", token=token)
+    correct = post(client, "/api/videos/video-introduction-ia/quiz/check", {
+        "question_index": 0,
+        "answer": 0,
+    }, token)
+    assert correct.status_code == 200
+    assert correct.get_json()["correct"] is True
+
+    incorrect = post(client, "/api/videos/video-introduction-ia/quiz/check", {
+        "question_index": 0,
+        "answer": 1,
+    }, token)
+    assert incorrect.status_code == 200
+    assert incorrect.get_json()["correct"] is False
+
+    invalid = post(client, "/api/videos/video-introduction-ia/quiz/check", {
+        "question_index": 99,
+        "answer": 0,
+    }, token)
+    assert invalid.status_code == 400
+
+
+def test_prompt_limit_and_full_structured_result(client, monkeypatch):
     token = register(client)
 
     def fake_ai(*_args, **_kwargs):
@@ -126,6 +168,7 @@ def test_prompt_limit_and_single_structured_result(client, monkeypatch):
     for remaining in [2, 1, 0]:
         response = post(client, "/api/prompt/analyze", {"prompt": "Explique les biais algorithmiques à un élève avec une liste."}, token)
         assert response.status_code == 200
+        assert response.get_json()["points"] == 20
         assert response.get_json()["prompt_usage"]["remaining"] == remaining
     blocked = post(client, "/api/prompt/analyze", {"prompt": "Un quatrième prompt valide."}, token)
     assert blocked.status_code == 429
@@ -146,6 +189,62 @@ def test_ai_configuration_error_does_not_consume_attempt(tmp_path):
     assert progress["prompt_usage"]["used"] == 0
 
 
+def test_ai_runtime_error_does_not_consume_attempt(client, monkeypatch):
+    token = register(client)
+
+    def unavailable(*_args, **_kwargs):
+        raise RuntimeError("temporary_failure")
+
+    monkeypatch.setattr("mepa.routes.analyze_with_gemini", unavailable)
+    response = post(client, "/api/prompt/analyze", {"prompt": "Explique les biais avec des exemples."}, token)
+    assert response.status_code == 502
+    assert response.get_json()["prompt_usage"]["used"] == 0
+    assert client.get("/api/progress").get_json()["prompt_usage"]["remaining"] == 3
+
+
+def test_gemini_retries_transient_errors(monkeypatch):
+    calls = {"count": 0}
+    successful_payload = {
+        "original_response": "Réponse initiale.",
+        "improved_prompt": "Prompt amélioré.",
+        "improved_response": "Réponse améliorée.",
+        "defects": [],
+        "improvement_reasons": ["Plus précis."],
+        "pedagogical_advice": ["Vérifier les faits."],
+    }
+
+    class FakeModels:
+        def generate_content(self, **_kwargs):
+            calls["count"] += 1
+            if calls["count"] < 3:
+                raise RuntimeError("temporary_failure")
+            return SimpleNamespace(text=json.dumps(successful_payload))
+
+    class FakeClient:
+        models = FakeModels()
+
+    fake_genai = SimpleNamespace(Client=lambda **_kwargs: FakeClient())
+    fake_types = SimpleNamespace(
+        HttpOptions=lambda **_kwargs: object(),
+        GenerateContentConfig=lambda **_kwargs: object(),
+    )
+    monkeypatch.setattr("mepa.ai_service.genai", fake_genai)
+    monkeypatch.setattr("mepa.ai_service.types", fake_types)
+    monkeypatch.setattr("mepa.ai_service.time.sleep", lambda _seconds: None)
+
+    result = analyze_with_gemini("key", "model", "prompt", "suggestion", retry_attempts=3)
+    assert calls["count"] == 3
+    assert result == successful_payload
+
+
+def test_age_groups_become_progressively_more_accessible():
+    assert classify_age(17) == "jeune"
+    assert classify_age(30) == "adulte"
+    assert classify_age(50) == "mature"
+    assert classify_age(65) == "senior"
+    assert classify_age(80) == "grand_senior"
+
+
 def test_local_video_route_is_protected_and_served(client):
     assert client.get("/media/video-intro-ia").status_code == 401
     register(client)
@@ -162,16 +261,18 @@ def test_certificate_is_a_real_pdf(client, app):
         rows = [
             (user_id, "video-introduction-ia", "video", 5, 5, "{}", "2026-06-23T10:00:00+00:00"),
             (user_id, "video-fonctionnement-ia", "video", 5, 5, "{}", "2026-06-23T10:01:00+00:00"),
-            (user_id, "video-introduction-ia-qcm", "video_quiz", 15, 22, "{}", "2026-06-23T10:02:00+00:00"),
-            (user_id, "prompt-lab", "prompt", 20, 20, "{}", "2026-06-23T10:03:00+00:00"),
-            (user_id, "arnaque-scenario", "scam", 15, 15, "{}", "2026-06-23T10:04:00+00:00"),
-            (user_id, "image-detection", "image", 10, 10, "{}", "2026-06-23T10:05:00+00:00"),
+            (user_id, "video-introduction-ia-qcm", "video_quiz", 22, 22, "{}", "2026-06-23T10:02:00+00:00"),
+            (user_id, "video-fonctionnement-ia-qcm", "video_quiz", 23, 23, "{}", "2026-06-23T10:03:00+00:00"),
+            (user_id, "prompt-lab", "prompt", 20, 20, "{}", "2026-06-23T10:04:00+00:00"),
+            (user_id, "arnaque-scenario", "scam", 15, 15, "{}", "2026-06-23T10:05:00+00:00"),
+            (user_id, "image-detection", "image", 10, 10, "{}", "2026-06-23T10:06:00+00:00"),
         ]
         db.executemany(
             "INSERT INTO activities(user_id,module_id,activity_type,points,max_points,details,completed_at) VALUES(?,?,?,?,?,?,?)",
             rows,
         )
         db.commit()
+    assert client.get("/api/progress").get_json()["score"] == 100
     response = post(client, "/certificate/download", token=csrf(client))
     assert response.status_code == 200
     assert response.mimetype == "application/pdf"

@@ -81,15 +81,20 @@ function updateAuthUi() {
   $('#logoutBtn')?.classList.toggle('hidden', !loggedIn);
   $('#authNavLink').textContent = loggedIn ? 'Formation' : 'Connexion';
   $('#authNavLink').setAttribute('href', loggedIn ? '#espace' : '#connexion');
+  $('#heroAccountBtn')?.classList.toggle('hidden', loggedIn);
+  $('#courseAccessBtn')?.setAttribute('href', loggedIn ? '#espace' : '#connexion');
   $('#espace')?.classList.toggle('hidden', !loggedIn);
   $('#connexion')?.classList.toggle('hidden', loggedIn);
 
+  const ageClasses = ['age-jeune', 'age-adulte', 'age-mature', 'age-senior', 'age-grand-senior'];
+  document.body.classList.remove(...ageClasses);
   if (state.user) {
-    document.body.classList.toggle('senior', state.user.age_group === 'senior');
+    const ageClass = state.user.age_group === 'grand_senior'
+      ? 'age-grand-senior'
+      : `age-${state.user.age_group}`;
+    document.body.classList.add(ageClass);
     $('#welcomeTitle').textContent = `Bienvenue ${state.user.name}`;
     $('#welcomeText').textContent = `Profil : ${labelRole(state.user.role)} - votre progression est enregistrée dans cet espace.`;
-  } else {
-    document.body.classList.remove('senior');
   }
 }
 
@@ -161,9 +166,12 @@ function renderVideos() {
     const warning = localMissing
       ? '<p class="inline-warning">Le fichier vidéo local sera disponible dès qu’il sera placé à la racine du projet.</p>'
       : '';
+    const duration = video.duration
+      ? `<span class="duration">${escapeHtml(video.duration)}</span>`
+      : '';
     return `
       <article class="card video-card ${done ? 'done' : ''} ${comingSoon ? 'coming-soon' : ''}">
-        <div class="card-topline"><span class="duration">${escapeHtml(video.duration)}</span>${status}</div>
+        <div class="card-topline">${duration}${status}</div>
         <h3>${escapeHtml(video.title)}</h3>
         <p>${escapeHtml(video.summary)}</p>
         <ul class="takeaways">${video.takeaways.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>
@@ -200,7 +208,7 @@ function renderVideoDialog(video) {
 
   const quizForm = $('#videoQuizForm');
   quizForm.innerHTML = video.quiz.map((question, questionIndex) => `
-    <fieldset class="question-card">
+    <fieldset class="question-card" data-question-index="${questionIndex}">
       <legend><strong>Question ${questionIndex + 1}</strong> - ${escapeHtml(question.question)}</legend>
       <div class="answers">
         ${question.choices.map((choice, choiceIndex) => `
@@ -209,8 +217,54 @@ function renderVideoDialog(video) {
             <span><strong>${String.fromCharCode(65 + choiceIndex)}.</strong> ${escapeHtml(choice)}</span>
           </label>`).join('')}
       </div>
+      <div class="question-actions">
+        <button class="btn btn-outline btn-small validate-question" data-question-index="${questionIndex}" type="button">Valider cette question</button>
+        <span class="question-feedback" role="status" aria-live="polite"></span>
+      </div>
     </fieldset>`).join('');
+  $$('.validate-question').forEach((button) => {
+    button.addEventListener('click', () => validateVideoQuestion(Number(button.dataset.questionIndex)));
+  });
+  $$('input[name^="video-q"]').forEach((input) => {
+    input.addEventListener('change', () => {
+      const card = input.closest('.question-card');
+      card?.classList.remove('question-correct', 'question-incorrect', 'question-unanswered');
+      const feedback = card?.querySelector('.question-feedback');
+      if (feedback) feedback.textContent = '';
+    });
+  });
   clearMessage($('#videoQuizResult'));
+}
+
+function setQuestionFeedback(index, status, message) {
+  const card = $(`.question-card[data-question-index="${index}"]`);
+  if (!card) return;
+  card.classList.remove('question-correct', 'question-incorrect', 'question-unanswered');
+  if (status) card.classList.add(`question-${status}`);
+  const feedback = card.querySelector('.question-feedback');
+  if (feedback) feedback.textContent = message;
+}
+
+async function validateVideoQuestion(index) {
+  if (!state.currentVideo) return;
+  const selected = $(`input[name="video-q${index}"]:checked`);
+  if (!selected) {
+    setQuestionFeedback(index, 'unanswered', 'Sélectionnez une réponse avant de valider.');
+    return;
+  }
+  const button = $(`.validate-question[data-question-index="${index}"]`);
+  if (button) button.disabled = true;
+  try {
+    const data = await api(`/api/videos/${encodeURIComponent(state.currentVideo.id)}/quiz/check`, {
+      method: 'POST',
+      body: JSON.stringify({ question_index: index, answer: Number(selected.value) }),
+    });
+    setQuestionFeedback(index, data.correct ? 'correct' : 'incorrect', data.message);
+  } catch (error) {
+    setQuestionFeedback(index, null, error.message);
+  } finally {
+    if (button) button.disabled = false;
+  }
 }
 
 async function completeCurrentVideo() {
@@ -226,8 +280,15 @@ async function submitCurrentVideoQuiz() {
     const selected = $(`input[name="video-q${index}"]:checked`);
     return selected ? Number(selected.value) : null;
   });
-  if (answers.some((answer) => answer === null)) {
-    setMessage($('#videoQuizResult'), 'Répondez aux huit questions avant de valider.', 'error');
+  const unanswered = answers
+    .map((answer, index) => (answer === null ? index : null))
+    .filter((index) => index !== null);
+  if (unanswered.length) {
+    unanswered.forEach((index) => setQuestionFeedback(index, 'unanswered', 'Cette question attend une réponse.'));
+    const result = $('#videoQuizResult');
+    result.className = 'message result-box warning';
+    result.textContent = "Toutes les questions n'ont pas reçu de réponse. Répondez aux questions en jaune avant de valider le QCM.";
+    $(`.question-card[data-question-index="${unanswered[0]}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
   const data = await api(`/api/videos/${encodeURIComponent(state.currentVideo.id)}/quiz`, {
@@ -235,6 +296,9 @@ async function submitCurrentVideoQuiz() {
     body: JSON.stringify({ answers }),
   });
   updateProgress(data.progress);
+  data.corrections.forEach((item, index) => {
+    setQuestionFeedback(index, item.correct ? 'correct' : 'incorrect', item.correct ? 'Bonne réponse !' : 'Réponse incorrecte.');
+  });
   const result = $('#videoQuizResult');
   result.className = 'message result-box';
   result.innerHTML = `
@@ -299,7 +363,7 @@ async function analyzePrompt() {
   }
   const button = $('#analyzePrompt');
   button.disabled = true;
-  output.innerHTML = '<div class="loading"><span class="spinner" aria-hidden="true"></span><p>Gemini analyse votre prompt…</p></div>';
+  output.innerHTML = '<div class="loading"><span class="spinner" aria-hidden="true"></span><p>Le service IA analyse votre prompt. Plusieurs tentatives automatiques peuvent être nécessaires…</p></div>';
   try {
     const data = await api('/api/prompt/analyze', { method: 'POST', body: JSON.stringify({ prompt }) });
     updateProgress(data.progress);

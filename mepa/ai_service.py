@@ -1,5 +1,6 @@
 import json
 import re
+import time
 from dataclasses import dataclass
 
 try:
@@ -86,7 +87,13 @@ RESPONSE_SCHEMA = {
 }
 
 
-def analyze_with_gemini(api_key: str, model: str, prompt: str, suggested_prompt: str) -> dict:
+def analyze_with_gemini(
+    api_key: str,
+    model: str,
+    prompt: str,
+    suggested_prompt: str,
+    retry_attempts: int = 3,
+) -> dict:
     if not api_key:
         raise RuntimeError("ai_not_configured")
     if genai is None or types is None:
@@ -113,22 +120,31 @@ Proposition heuristique à utiliser comme point de départ, sans obligation de l
 {suggested_prompt}
 """.strip()
 
-    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=30000))
-    response = client.models.generate_content(
-        model=model,
-        contents=instruction,
-        config=types.GenerateContentConfig(
-            temperature=0.25,
-            max_output_tokens=1800,
-            response_mime_type="application/json",
-            response_json_schema=RESPONSE_SCHEMA,
-        ),
-    )
-    text = (response.text or "").strip()
-    if not text:
-        raise RuntimeError("empty_ai_response")
-    payload = json.loads(text)
-    for key in RESPONSE_SCHEMA["required"]:
-        if key not in payload:
-            raise RuntimeError("invalid_ai_response")
-    return payload
+    attempts = max(1, min(5, int(retry_attempts)))
+    last_error = None
+    for attempt in range(attempts):
+        try:
+            client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=25000))
+            response = client.models.generate_content(
+                model=model,
+                contents=instruction,
+                config=types.GenerateContentConfig(
+                    temperature=0.25,
+                    max_output_tokens=1800,
+                    response_mime_type="application/json",
+                    response_json_schema=RESPONSE_SCHEMA,
+                ),
+            )
+            text = (response.text or "").strip()
+            if not text:
+                raise RuntimeError("empty_ai_response")
+            payload = json.loads(text)
+            for key in RESPONSE_SCHEMA["required"]:
+                if key not in payload:
+                    raise RuntimeError("invalid_ai_response")
+            return payload
+        except Exception as exc:
+            last_error = exc
+            if attempt + 1 < attempts:
+                time.sleep(0.6 * (attempt + 1))
+    raise RuntimeError("ai_retry_exhausted") from last_error

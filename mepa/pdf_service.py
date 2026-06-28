@@ -69,7 +69,7 @@ def build_certificate_pdf(name: str, score: int, certificate_id: str, issued_dat
     story.extend([
         flag,
         Spacer(1, 10 * mm),
-        Paragraph("PLATEFORME IA CLAIR - PROJET ETUDIANT MEPA", small),
+        Paragraph("PLATEFORME IA CITOYENNE - PROJET ETUDIANT MEPA", small),
         Spacer(1, 4 * mm),
         Paragraph("Certificat de sensibilisation à l'intelligence artificielle", title),
         Paragraph("Ce certificat atteste que", body),

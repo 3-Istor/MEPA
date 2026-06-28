@@ -1,4 +1,4 @@
-# IA Clair / MEPA - plateforme de sensibilisation à l'intelligence artificielle
+# IA Citoyenne / MEPA - plateforme de sensibilisation à l'intelligence artificielle
 
 Version auditée et corrigée du projet Flask MEPA. L'interface garde une identité française institutionnelle, tout en indiquant clairement qu'il s'agit d'un projet étudiant et non d'un site officiel.
 
@@ -12,7 +12,7 @@ Version auditée et corrigée du projet Flask MEPA. L'interface garde une identi
 - Obligation d'ouvrir une vidéo avant de pouvoir la marquer comme terminée ou valider son QCM.
 - Deux QCM de 8 questions, corrigés uniquement côté serveur.
 - Laboratoire de prompts Gemini : diagnostic, réponse initiale, prompt amélioré, réponse améliorée et explications.
-- Une seule requête Gemini par essai et limite serveur de 3 essais par compte.
+- Jusqu'à trois tentatives Gemini automatiques en cas d'échec temporaire et limite serveur de 3 essais réussis par compte.
 - Exercices anti-arnaques et détection d'images générées.
 - Score sur 100 et vrai certificat PDF à partir de 70/100.
 - Export JSON, politique de confidentialité dédiée et suppression définitive du compte.
@@ -39,10 +39,11 @@ Le fichier `.env` est déjà inclus dans cette archive avec une clé Flask aléa
 ```env
 GEMINI_API_KEY=votre_cle_ici
 GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_RETRY_ATTEMPTS=3
 PROMPT_ATTEMPT_LIMIT=3
 ```
 
-La clé ne doit jamais être écrite dans `static/js/app.js`, dans un dépôt Git ou dans le navigateur. L'application effectue une seule requête structurée Gemini par essai et bloque le quatrième essai pour chaque compte.
+La clé ne doit jamais être écrite dans `static/js/app.js`, dans un dépôt Git ou dans le navigateur. L'application réessaie automatiquement jusqu'à trois fois en cas d'échec temporaire. Seuls les essais réussis sont décomptés, et le quatrième succès est bloqué pour chaque compte.
 
 Les quotas gratuits sont gérés par Google et peuvent varier selon le projet. Consultez vos limites actives dans Google AI Studio.
 
