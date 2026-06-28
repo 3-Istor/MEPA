@@ -7,10 +7,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DEVELOPMENT_SECRET_KEY = "dev-only-change-before-deploy"
+
+
+def secret_key_from_environment() -> str:
+    """Accept the standard name and the existing infrastructure name."""
+    return (
+        os.getenv("SECRET_KEY")
+        or os.getenv("FLASK_SECRET_KEY")
+        or DEVELOPMENT_SECRET_KEY
+    )
 
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-change-before-deploy")
+    SECRET_KEY = secret_key_from_environment()
     DATABASE_PATH = os.getenv("DATABASE_PATH", str(PROJECT_ROOT / "data" / "mepa.sqlite"))
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
     GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite").strip()

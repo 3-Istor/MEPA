@@ -5,6 +5,7 @@ import pytest
 
 from mepa import create_app
 from mepa.ai_service import analyze_with_gemini
+from mepa.config import DEVELOPMENT_SECRET_KEY, secret_key_from_environment
 from mepa.db import get_db
 from mepa.routes import classify_age
 
@@ -70,6 +71,19 @@ def test_health_reports_gemini_configuration(client):
         "status": "ok",
         "services": {"gemini_configured": True},
     }
+
+
+def test_flask_secret_key_environment_alias(monkeypatch):
+    monkeypatch.delenv("SECRET_KEY", raising=False)
+    monkeypatch.setenv("FLASK_SECRET_KEY", "infrastructure-secret")
+    assert secret_key_from_environment() == "infrastructure-secret"
+
+    monkeypatch.setenv("SECRET_KEY", "standard-secret")
+    assert secret_key_from_environment() == "standard-secret"
+
+    monkeypatch.delenv("SECRET_KEY")
+    monkeypatch.delenv("FLASK_SECRET_KEY")
+    assert secret_key_from_environment() == DEVELOPMENT_SECRET_KEY
 
 
 def test_privacy_policy_is_public(client):

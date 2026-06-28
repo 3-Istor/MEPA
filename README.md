@@ -221,6 +221,7 @@ Après le déploiement, `/health` doit indiquer
 laisser les nouvelles tentatives Gemini se terminer.
 
 - Remplacer `SECRET_KEY` par une valeur longue et aléatoire.
+- `FLASK_SECRET_KEY` est également accepté comme alias de `SECRET_KEY` pour les plateformes qui utilisent déjà ce nom.
 - Activer HTTPS et mettre `SESSION_COOKIE_SECURE=true`.
 - Ne jamais publier `GEMINI_API_KEY` ; utiliser les secrets de l'hébergeur.
 - Désactiver définitivement `FLASK_DEBUG`.
