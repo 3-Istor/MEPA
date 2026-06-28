@@ -63,6 +63,15 @@ def test_protected_endpoint_requires_authentication(client):
     assert response.status_code == 401
 
 
+def test_health_reports_gemini_configuration(client):
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.get_json() == {
+        "status": "ok",
+        "services": {"gemini_configured": True},
+    }
+
+
 def test_privacy_policy_is_public(client):
     response = client.get("/confidentialite")
     assert response.status_code == 200

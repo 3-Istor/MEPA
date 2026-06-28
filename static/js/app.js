@@ -334,8 +334,9 @@ function renderAiStatus() {
   if (state.content.ai.configured) {
     setMessage(notice, `Gemini est configuré avec le modèle ${state.content.ai.model}.`, 'success');
   } else {
-    setMessage(notice, 'Gemini n’est pas encore configuré. Ajoutez GEMINI_API_KEY dans le fichier .env puis relancez le serveur.', 'error');
+    setMessage(notice, 'Gemini n’est pas configuré sur le serveur. Ajoutez GEMINI_API_KEY aux variables ou secrets du déploiement, puis redémarrez-le.', 'error');
   }
+  renderPromptLimit();
 }
 
 function renderPromptLimit() {
@@ -344,8 +345,9 @@ function renderPromptLimit() {
   if (box) box.innerHTML = `<strong>${usage.remaining}</strong> essai(s) restant(s) sur ${usage.limit}.`;
   const button = $('#analyzePrompt');
   if (button) {
-    button.disabled = usage.remaining <= 0;
-    button.textContent = usage.remaining <= 0 ? 'Limite atteinte' : 'Tester mon prompt';
+    const aiConfigured = state.content?.ai?.configured !== false;
+    button.disabled = usage.remaining <= 0 || !aiConfigured;
+    button.textContent = !aiConfigured ? 'Gemini non configuré' : usage.remaining <= 0 ? 'Limite atteinte' : 'Tester mon prompt';
   }
 }
 

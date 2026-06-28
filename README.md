@@ -201,6 +201,25 @@ docker run --rm -p 8000:8000 \
 
 ## 10. À changer impérativement avant déploiement
 
+### Déploiement Kubernetes avec Helm
+
+Le fichier `.env` n'est volontairement jamais copié dans l'image Docker. Créez
+un Secret Kubernetes, puis demandez au chart de l'utiliser :
+
+```bash
+kubectl create secret generic ia-clair-runtime \
+  --from-literal=SECRET_KEY='une-valeur-longue-et-aleatoire' \
+  --from-literal=GEMINI_API_KEY='votre-cle-gemini'
+
+helm upgrade --install ia-clair ./helm/ia-clair \
+  --set secrets.create=false \
+  --set secrets.existingSecret=ia-clair-runtime
+```
+
+Après le déploiement, `/health` doit indiquer
+`"gemini_configured": true`. Le chart configure aussi les délais NGINX pour
+laisser les nouvelles tentatives Gemini se terminer.
+
 - Remplacer `SECRET_KEY` par une valeur longue et aléatoire.
 - Activer HTTPS et mettre `SESSION_COOKIE_SECURE=true`.
 - Ne jamais publier `GEMINI_API_KEY` ; utiliser les secrets de l'hébergeur.

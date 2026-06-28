@@ -15,7 +15,7 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- if .Values.secrets.create }}
+        {{- if and .Values.secrets.create (not .Values.secrets.existingSecret) }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.podAnnotations }}
@@ -48,9 +48,9 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ include "ia-clair.fullname" . }}
-        {{- if .Values.secrets.create }}
+        {{- if or .Values.secrets.create .Values.secrets.existingSecret }}
         - secretRef:
-            name: {{ include "ia-clair.fullname" . }}
+            name: {{ .Values.secrets.existingSecret | default (include "ia-clair.fullname" .) }}
         {{- end }}
         {{- if .Values.extraEnvFrom }}
         {{- toYaml .Values.extraEnvFrom | nindent 8 }}

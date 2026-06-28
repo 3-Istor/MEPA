@@ -39,6 +39,11 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # A Gemini request can include several server-side retries. Keep the proxy
+    # alive longer than the Gunicorn request timeout so it does not return a
+    # misleading 504 while the application is still processing the prompt.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "100"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "100"
   hosts:
     - host: ia-clair.example.com
       paths:
@@ -73,9 +78,18 @@ persistence:
 
 env:
   AI_PROVIDER: "gemini"
+  DATABASE_PATH: "/app/data/mepa.sqlite"
+  GEMINI_RETRY_ATTEMPTS: "3"
+  PROMPT_ATTEMPT_LIMIT: "3"
+  SESSION_COOKIE_SECURE: "true"
+  TRUST_PROXY: "true"
 
 secrets:
-  create: true 
+  # In production, prefer an existing Kubernetes Secret managed outside Helm.
+  # It must contain GEMINI_API_KEY and SECRET_KEY.
+  create: true
+  existingSecret: ""
+  SECRET_KEY: ""
   OPENAI_API_KEY: ""
   GEMINI_API_KEY: ""
   GEMINI_MODEL: "gemini-2.5-flash-lite"

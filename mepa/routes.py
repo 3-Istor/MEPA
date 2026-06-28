@@ -470,7 +470,7 @@ def analyze_prompt():
     if not current_app.config["GEMINI_API_KEY"]:
         return jsonify({
             "error": "ai_not_configured",
-            "message": "Le laboratoire IA n'est pas encore configuré. Ajoutez GEMINI_API_KEY dans le fichier .env puis relancez l'application.",
+            "message": "Le laboratoire IA n'est pas configuré sur le serveur. Ajoutez GEMINI_API_KEY aux variables ou secrets du déploiement, puis redémarrez-le.",
         }), 503
 
     usage = prompt_usage(user["id"])
@@ -607,4 +607,7 @@ def download_certificate():
 
 @bp.get("/health")
 def health():
-    return jsonify({"status": "ok"})
+    return jsonify({
+        "status": "ok",
+        "services": {"gemini_configured": bool(current_app.config["GEMINI_API_KEY"])},
+    })
